@@ -1,7 +1,12 @@
 const express = require('express');
-const passport = require('passport');
-const session = require('express-session');
-const bodyParser = require('body-parser');
+const path = require('path');
+
+const router = express.Router();
 
 const app = express();
 
+let port = 3000;
+
+app.listen(port, () => {
+    console.log(`listening on port ${port}`);
+});
