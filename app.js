@@ -49,6 +49,7 @@ app.get('/user/:id', (req, res) => {
         userID: req.body.userID,
         name: req.body.name,
         age: req.body.age,
+        email: req.body.email,
         id: req.params.id
     });
 });
