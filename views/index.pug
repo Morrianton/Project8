@@ -1,9 +1,8 @@
 extends layouts/layout
 
 block headContent
-    title= title
+
 block bodyContent
-    h1= pageTitle
     form(method='POST', action='/users')
         div
             input(id='userID', name='userID', placeholder='User ID')
@@ -15,3 +14,4 @@ block bodyContent
             input(id='email', name='email', type='email', placeholder='Email')
         div
             input(type='submit', value='Add User')
+        a(href='/users') Go to Users

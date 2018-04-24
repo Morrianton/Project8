@@ -19,39 +19,36 @@ let users = [];
 let id = 0;
 
 app.get('/', (req, res) => {
-    res.render('index', {
-        title: "Simple User Manager",
-        pageTitle: "Simple User Manager"
-    });
+    res.render('index');
 });
 
 app.post('/users', (req, res) => {
-    id++;
+    fs.writeFile();
     users.push({
-       userID: req.body.userID,
-       name: req.body.name,
-       age: req.body.age,
-       email: req.body.email,
-        id: id
-    });
-    res.render('users', {users: users});
-});
-
-app.get('/index', (req, res) => {
-    res.render('index', {
-        title: "Simple User Manager",
-        pageTitle: "Simple User Manager"
-    });
-});
-
-app.get('/user/:id', (req, res) => {
-    res.render('edit', {
         userID: req.body.userID,
         name: req.body.name,
         age: req.body.age,
         email: req.body.email,
-        id: req.params.id
+        ident: id
     });
+    id++;
+    res.render('users', {users: users});
+});
+
+app.get('/users', (req, res) => {
+    res.render('users',
+        {
+            users: users
+        });
+});
+
+app.get('/edit-user/:id', (req, res) => {
+    res.render('edit', {user: users[req.params.id]});
+});
+
+app.get('/delete', (req, res) => {
+   users.splice((req.params.id), 1);
+   res.render('users', {users: users});
 });
 
 

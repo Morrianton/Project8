@@ -3,7 +3,8 @@ extends layouts/layout
 block headContent
 
 block bodyContent
-    form(method='POST', action='/users/' + user.id)
+
+    form(method='POST', action='/users')
         div
             input(id='userID', name='userID', placeholder='User ID', value=user.userID)
         div
@@ -13,4 +14,5 @@ block bodyContent
         div
             input(id='email', name='email', type='email', placeholder='Email', value=user.email)
         div
-            input(type='submit', value='Add User')
+            input(type='submit', value='Confirm')
+            a(href='/users') Cancel
