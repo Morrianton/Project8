@@ -13,7 +13,8 @@ if users
             td=user.age
             td=user.email
             a(href='/edit-user/' + user.id) Edit
-            a(href='/delete') delete
+            a(href='/delete/' + user.id) delete
+        br
 
 
 unless users

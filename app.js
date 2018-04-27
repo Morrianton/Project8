@@ -16,8 +16,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 let file = 'users.json';
-let json = {};
+let newUser = {};
+let users;
 let obj;
+let json;
 
 let id = 1;
 
@@ -28,117 +30,111 @@ app.get('/', (req, res) => {
 // Adds new user to users table via POST request
 app.post('/users', (req, res) => {
 
-    fs.open(file, 'w+', (err, fd) => {
-        if (err) throw err;
+    fs.readFile(file, 'utf8', (err, data) => {
+       if (err) throw err;
 
-        console.log(file + ' opened');
+       obj = JSON.parse(data);
 
-        // add user object to users array and write to file
-        fs.readFile(file, 'utf8', (err, data) => {
-            if (err) throw err;
+       if(obj.users === null) {
 
-            // check for data & add user if yes
-            if (data) {
-                obj = JSON.parse(data);
+           newUser = {
+               id: id,
+               userID: req.body.userID,
+               name: req.body.name,
+               age: req.body.age,
+               email: req.body.email
+           };
 
-                // loop through users to determine what id should be
-                obj.users.forEach((user) => {
-                    if(id === user.id) {
-                        id++;
-                    }
-                });
+       }
+       else {
+           obj.users.forEach((user) => {
+               if(id === user.id) {
+                   id++;
+               }
+           });
 
-                // create user object
-                let user = {
-                    id: id,
-                    userID: req.body.userID,
-                    name: req.body.name,
-                    age: req.body.age,
-                    email: req.body. email
-                };
+           newUser = {
+               id: id,
+               userID: req.body.userID,
+               name: req.body.name,
+               age: req.body.age,
+               email: req.body.email
+           };
 
-                // add user to users array & write to file
-                obj.users.push(user);
-                json = JSON.stringify(obj);
-                fs.writeFile(file, json, 'utf8', (err) => {
-                    if (err) throw err;
+           id = 1;
 
-                    console.log(`${req.body.userID.toString()} was added to ` + file);
-                });
+       }
 
-                fs.close(fd, () => {
-                    console.log(file + ' closed');
-                });
+           obj.users.push(newUser);
+           json = JSON.stringify(obj);
+           fs.writeFile(file, json, 'utf8', (err) => {
+               if (err) throw err;
 
-            }
-            // create file if no data
-            else {
-                let buffer = new Buffer('{"users":[]}');
-                fs.write(fd, buffer, 0, buffer.length, null, (err) => {
-                    if (err) throw err;
+               console.log(`${req.body.userID} was added to ${file}`);
+           });
 
-                    fs.readFile(file, 'utf8', (err, data) => {
+       res.render('users', {users: obj.users});
 
-                        obj = JSON.parse(data);
-
-                        // loop through users to determine what id should be
-                        obj.users.forEach((user) => {
-                            if(id === user.id) {
-                                id++;
-                            }
-                        });
-
-                        // create user object
-                        let user = {
-                            id: id,
-                            userID: req.body.userID,
-                            name: req.body.name,
-                            age: req.body.age,
-                            email: req.body. email
-                        };
-
-                        // add user to users array & write to file
-                        obj.users.push(user);
-                        json = JSON.stringify(obj);
-                        fs.writeFile(file, json, 'utf8', (err) => {
-                            if (err) throw err;
-
-                            console.log(`${req.body.userID.toString()} was added to ` + file);
-                        });
-
-                        fs.close(fd, () => {
-                            console.log(file + ' closed')
-                        });
-
-                        console.log(obj.users);
-                    });
-                });
-            }
-
-        });
     });
-
-    res.render('users', {users: obj.users})
-
 });
 
 app.get('/users', (req, res) => {
-    res.render('users',
-        {
-            users: obj.users
-        });
+
+    fs.readFile(file, 'utf8', (err, data) => {
+        if (err) throw err;
+
+        obj = JSON.parse(data);
+
+        res.render('users', {users: obj.users});
+
+    });
+
 });
 
 app.get('/edit-user/:id', (req, res) => {
-    res.render('edit', {user: obj.users[req.params.id]});
+    res.render('edit', {user: users[req.params.id]});
 });
 
-app.get('/delete', (req, res) => {
-   users.splice((req.params.id), 1);
-   res.render('users', {users: obj.users});
+app.get('/delete/:id', (req, res) => {
+    let userIndex = 0;
+
+    fs.readFile(file, 'utf8', (err, data) => {
+       if (err) {
+           console.log(err);
+       }
+       else {
+           obj = JSON.parse(data);
+
+           userIndex = findUserIndex(req.params.id, obj.users);
+
+           obj.users.splice((userIndex), 1);
+
+           json = JSON.stringify(obj);
+
+           fs.writeFile(file, json, (err) => {
+               if (err) throw err;
+           });
+
+           res.render('users', {users: obj.users});
+       }
+    });
+
 });
 
 
 app.listen(port, () => {
     console.log(`listening on port ${port}`);
 });
+
+// finds a user's index by their id and returns it
+function findUserIndex(id, array) {
+    let index = 0;
+
+    for(let i = 0; i <= array.length - 1; i++) {
+        if(id === array[i].id) {
+            index = i;
+        }
+    }
+    return index;
+}
+
