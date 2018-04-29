@@ -4,7 +4,7 @@ block headContent
 
 block bodyContent
 
-    form(method='POST', action='/users')
+    form(method='POST', action='/edit-user/' + user.id)
         div
             input(id='userID', name='userID', placeholder='User ID', value=user.userID)
         div
