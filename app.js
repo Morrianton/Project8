@@ -67,15 +67,14 @@ app.post('/users', (req, res) => {
 
            obj.users.push(newUser);
            json = JSON.stringify(obj);
-           fs.writeFile(file, json, 'utf8', (err) => {
-               if (err) throw err;
+           fs.writeFileSync(file, json, 'utf8');
 
-               console.log(`${req.body.userID} was added to ${file}`);
-           });
+           console.log(`${req.body.userID} was added to ${file}`);
 
-       res.render('users', {users: obj.users});
+        res.render('users', {users: obj.users});
 
     });
+
 });
 
 app.get('/users', (req, res) => {
@@ -92,35 +91,71 @@ app.get('/users', (req, res) => {
 });
 
 app.get('/edit-user/:id', (req, res) => {
-    res.render('edit', {user: users[req.params.id]});
-});
-
-app.get('/delete/:id', (req, res) => {
-    let userIndex = 0;
 
     fs.readFile(file, 'utf8', (err, data) => {
-       if (err) {
-           console.log(err);
-       }
-       else {
-           obj = JSON.parse(data);
 
-           userIndex = findUserIndex(req.params.id, obj.users);
+        obj = JSON.parse(data);
 
-           obj.users.splice((userIndex), 1);
+        let userIndex = findUserIndex(req.params.id, obj.users);
 
-           json = JSON.stringify(obj);
-
-           fs.writeFile(file, json, (err) => {
-               if (err) throw err;
-           });
-
-           res.render('users', {users: obj.users});
-       }
+        res.render('edit', {user: obj.users[userIndex]});
     });
+});
+
+app.post('/edit-user/:id', (req, res) => {
+
+    fs.readFile(file, 'utf8', (err, data) => {
+        if (err) throw err;
+
+        obj = JSON.parse(data);
+
+        newUser = {
+            id: req.params.id,
+            userID: req.body.userID,
+            name: req.body.name,
+            age: req.body.age,
+            email: req.body.email
+        };
+
+        let userIndex = findUserIndex(req.params.id, obj.users);
+
+        obj.users.splice((userIndex), 1, newUser);
+
+        json = JSON.stringify(obj);
+
+        fs.writeFileSync(file, json, 'utf8');
+    });
+
+    res.redirect('/users');
+});
+
+
+app.get('/delete/:id', (req, res) => {
+
+    fs.readFile(file, 'utf8', (err, data) => {
+       if (err) throw err;
+
+       obj = JSON.parse(data);
+
+       let userIndex = findUserIndex(req.params.id, obj.users);
+
+       obj.users.splice((userIndex), 1);
+
+       json = JSON.stringify(obj);
+
+       fs.writeFileSync(file, json, 'utf8');
+
+   });
+
+    res.redirect('/users');
 
 });
 
+app.get('/delete', (req, res) => {
+
+    res.redirect('/users');
+
+});
 
 app.listen(port, () => {
     console.log(`listening on port ${port}`);
@@ -131,10 +166,11 @@ function findUserIndex(id, array) {
     let index = 0;
 
     for(let i = 0; i <= array.length - 1; i++) {
-        if(id === array[i].id) {
+        if(id == array[i].id) {
             index = i;
         }
     }
-    return index;
-}
 
+    return index;
+
+}
